@@ -5,7 +5,12 @@ import os
 import re
 import zipfile
 import logging
+import datetime
 
+logging.basicConfig(filename='test.log', level=logging.DEBUG, force=True)
+
+today = datetime.date.today()
+yesterday = today - datetime.timedelta(days=1)
 
 class UnexpectedFormat(Exception):
     def __init__(self, message):
@@ -32,7 +37,7 @@ def download(date, end, destdir):
 
 
 def verify_ingest(outfile):
-    expected_header = "RUN_TIME,TIME_INTERVAL,RESOURCE_NAME,REGION_NAME,RESOURCE_TYPE,FUEL_TYPE,ZONE_ID,PARTICIPANT_ID,MW,LMP,LOSS_FACTOR,LMP_SMP,LMP_LOSS,LMP_CONGESTION"
+    expected_header = "RUN_TIME,MKT_TYPE,TIME_INTERVAL,REGION_NAME,RESOURCE_NAME,RESOURCE_TYPE,SCHED_MW,LMP,LOSS_FACTOR,LMP_SMP,LMP_LOSS,LMP_CONGESTION"
 
     with open(outfile, "r") as outfp:
         firstline = outfp.readline().strip()
@@ -40,7 +45,7 @@ def verify_ingest(outfile):
         if firstline != expected_header:
             os.remove(outfile)
             msg = "Got header={}, but expected={}".format(firstline, expected_header)
-            logging.error(msg)
+            logging.ERROR(msg)
             raise UnexpectedFormat(msg)
         else:
             print("File {} verified".format(outfile))
